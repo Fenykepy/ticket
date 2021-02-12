@@ -1,0 +1,41 @@
+#!/bin/bash
+
+######################################################
+## Simple program to create a ticket (issue, bug)   ##
+## in a plain text file in git root directery       ##
+######################################################
+
+## Exit if we are not in git repository
+repository=$(git rev-parse --is-inside-work-tree 2> /dev/null)
+if [ "$repository" != "true" ]
+then
+	echo "Not in a git repository."
+	echo "Exit"
+	exit 1
+fi
+	
+## Search git top level directory, cd to it.
+cd "$(git rev-parse --show-toplevel)"
+
+# TODO search for conf file, and grab tickets location from it, otherwise use <git_root>/tickets
+
+
+## Set ticket ID as UUID first 8 chars (for readability)
+# TODO check if file exists, if so try another uuid. 
+id=$(uuidgen | cut -c1-8 | awk '{ print tolower($0) }')
+
+## Set current git email as author
+author=$(git config user.email)
+
+## Prompt user for ticket title
+read -p 'Title: ' title
+
+## Promt user for ticket description
+read -p 'Description: ' description
+
+
+## Prompt user for ticket tag 
+
+## Save ticket
+touch "$directory$id"
+sed -i '33ianything' textpath
