@@ -21,12 +21,8 @@ fi
 ## Search git top level directory, cd to it.
 cd "$(git rev-parse --show-toplevel)"
 
-# TODO search for conf file, and grab tickets location from it, otherwise use <git_root>/tickets
+# TODO search for conf file, and grab tickets location and labels from it, otherwise use <git_root>/tickets
 
-
-## Set ticket ID as UUID first 8 chars (for readability)
-# TODO check if file exists, if so try another uuid. 
-id=$(uuidgen | cut -c1-8 | awk '{ print tolower($0) }')
 
 ## Set current git email as author
 author=$(git config user.email)
@@ -42,19 +38,31 @@ read -p 'Description: ' description
 PS3="Select ticket label: "
 select label in "${labels[@]}"
 do
-    echo "reply: $REPLY"
-    echo "arg number: $#"
-
     if [ 1 -le "$REPLY" ] && [ "$REPLY" -le "${#labels[@]}" ]
     then
+        echo "Label $label selected."
         break
     fi
     echo "Wrong selection, try again"
 done
 
-## Save ticket
-ticketpath=$directory$id
+## Create tickets directory if necessary
 mkdir -p $directory
+
+## Set ticket ID as UUID first 8 chars (for readability)
+## Check if file exists, if so try another uuid. 
+free=false
+until [ $free == true ]
+do
+    id=$(uuidgen | cut -c1-8 | awk '{ print tolower($0) }')
+    ticketpath=$directory$id
+    if [ ! -e $ticketpath ]; then
+        free=true
+    fi
+
+done
+
+## Save ticket
 echo "ticket: $id" > $ticketpath
 echo "author: $author" >> $ticketpath
 echo "status: open" >> $ticketpath
