@@ -6,6 +6,8 @@
 ######################################################
 
 directory="tickets/"
+labels=("bug" "enhancement" "documentation")
+
 
 ## Exit if we are not in git repository
 repository=$(git rev-parse --is-inside-work-tree 2> /dev/null)
@@ -36,7 +38,19 @@ read -p 'Title: ' title
 read -p 'Description: ' description
 
 
-## Prompt user for ticket tag 
+## Prompt user for ticket label
+PS3="Select ticket label: "
+select label in "${labels[@]}"
+do
+    echo "reply: $REPLY"
+    echo "arg number: $#"
+
+    if [ 1 -le "$REPLY" ] && [ "$REPLY" -le "${#labels[@]}" ]
+    then
+        break
+    fi
+    echo "Wrong selection, try again"
+done
 
 ## Save ticket
 ticketpath=$directory$id
@@ -44,6 +58,7 @@ mkdir -p $directory
 echo "ticket: $id" > $ticketpath
 echo "author: $author" >> $ticketpath
 echo "status: open" >> $ticketpath
+echo "label: $label" >> $ticketpath
 echo "title: $title" >> $ticketpath
 echo "-----------" >> $ticketpath
 echo "" >> $ticketpath

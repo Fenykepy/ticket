@@ -1,13 +1,17 @@
 #!/bin/bash
 
-directory="tickets/"
-mkdir -p $directory
+labels=("none" "bug" "enhancement" "documentation")
 
-title="test title"
-id="testticket"
-ticketpath=$directory$id
+PS3="Select ticket label: "
+select label in "${labels[@]}"
+do
+    echo "reply: $REPLY"
+    echo "arg number: $#"
 
-touch $ticketpath
-sed -i "3i\
-$title" $ticketpath
-
+    if [ 1 -le "$REPLY" ] && [ "$REPLY" -le "${#labels[@]}" ]
+    then
+        echo "You choosed $label"
+        break
+    fi
+    echo "Wrong selection, try again"
+done
