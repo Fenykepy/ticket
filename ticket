@@ -5,6 +5,8 @@
 ## in a plain text file in git root directery       ##
 ######################################################
 
+directory="tickets/"
+
 ## Exit if we are not in git repository
 repository=$(git rev-parse --is-inside-work-tree 2> /dev/null)
 if [ "$repository" != "true" ]
@@ -37,5 +39,21 @@ read -p 'Description: ' description
 ## Prompt user for ticket tag 
 
 ## Save ticket
-touch "$directory$id"
-sed -i '33ianything' textpath
+ticketpath=$directory$id
+mkdir -p $directory
+echo "ticket: $id" > $ticketpath
+echo "author: $author" >> $ticketpath
+echo "status: open" >> $ticketpath
+echo "title: $title" >> $ticketpath
+echo "-----------" >> $ticketpath
+echo "" >> $ticketpath
+echo "$description" >> $ticketpath
+
+## Show result
+echo ""
+echo ""
+echo "Ticket saved as $id"
+echo ""
+cat $ticketpath
+echo ""
+
