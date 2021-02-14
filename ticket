@@ -16,7 +16,7 @@ function usage {
     echo "Usage:"
     echo "  ticket -h                   Display this help message."
     echo "  ticket                      Add a new ticket."
-    #echo "  ticket add                  Also add a new ticket."
+    echo "  ticket add                  Also add a new ticket."
     #echo "  ticket close <ticket_id>    Set <ticket_id> as closed."
     #echo "  ticket edit <ticket_id>     Open <ticket_id> in text editor."
     #echo "  ticket list                 List all tickets."
@@ -41,6 +41,15 @@ function check_ticket_path { #$1 is ticket path, required
     elif [ ! -e "$1" ]
     then
         echo "No such ticket file '$1'."
+        exit 1
+    fi
+
+    ## check if file is a ticket file
+    line=$(head -n 1 $1 | cut -c1-7)
+
+    if [ "$line" != "ticket:" ]
+    then
+        echo "File '$1' doesn't seem to be a ticket."
         exit 1
     fi
 }
@@ -124,7 +133,7 @@ function close_ticket { #$1 is ticket path, required
 
 function edit_ticket { #$1 is ticket path, required
     check_ticket_path $1
-    echo "Edit ticket"
+    $EDITOR $1
     exit 0
 }
 
