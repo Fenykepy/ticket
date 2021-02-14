@@ -34,6 +34,7 @@ function invalid_option { # $1 is $OPTARG
     exit 1
 }
 
+
 function check_ticket_path { #$1 is ticket path, required
     if [ -z "$1" ]
     then
@@ -55,7 +56,7 @@ function check_ticket_path { #$1 is ticket path, required
     fi
 }
 
-function add_ticket {
+function cd_to_repository_top_level {
     ## Exit if we are not in git repository
     repository=$(git rev-parse --is-inside-work-tree 2> /dev/null)
     if [ "$repository" != "true" ]
@@ -66,6 +67,14 @@ function add_ticket {
     fi
     ## Search git top level directory, cd to it.
     cd "$(git rev-parse --show-toplevel)"
+
+    ## Create tickets directory if necessary
+    mkdir -p $DIRECTORY
+}
+
+
+function add_ticket {
+    cd_to_repository_top_level
 
     # TODO search for conf file, and grab tickets location and labels from it, otherwise use <git_root>/tickets
 
@@ -89,9 +98,6 @@ function add_ticket {
         fi
         echo "Wrong selection, try again"
     done
-
-    ## Create tickets directory if necessary
-    mkdir -p $DIRECTORY
 
     ## Set ticket ID as UUID first 8 chars (for readability)
     ## Check if file exists, if so try another uuid. 
@@ -126,6 +132,7 @@ function add_ticket {
     exit 0
 }
 
+
 function close_ticket { #$1 is ticket path, required
     check_ticket_path $1
     status=$(sed '3q;d' $1 | cut -c9-)
@@ -136,10 +143,11 @@ function close_ticket { #$1 is ticket path, required
         echo "Ticket '$id' is already closed."
         exit 0
     fi
-    sed -i '.back' '3s/.*/status: closed/' $1
+    sed -i '' '3s/.*/status: closed/' $1
     echo "Closed ticket '$id'"
     exit 0
 }
+
 
 function open_ticket { #$1 is ticket path, required
     check_ticket_path $1
@@ -151,14 +159,47 @@ function open_ticket { #$1 is ticket path, required
         echo "Ticket '$id' is already open."
         exit 0
     fi
-    sed -i '.back' '3s/.*/status: open/' $1
+    sed -i '' '3s/.*/status: open/' $1
     echo "Opened ticket '$id'"
     exit 0
 }
 
+
 function edit_ticket { #$1 is ticket path, required
     check_ticket_path $1
     $EDITOR $1
+    exit 0
+}
+
+
+function list_tickets {
+    cd_to_repository_top_level
+    cd $DIRECTORY
+
+    format="%-10s%-8s%-10s%s\n"
+    separator="----------------------------------------"
+    printf $format "Id" "Status" "Label" "Title"
+    printf "%s\n" $separator
+    
+    counter=0
+    for ticket in $(ls -t)
+    do
+        id=$(sed '1q;d' $ticket | cut -c9-) 
+        status=$(sed '3q;d' $ticket | cut -c9-)
+        title=$(sed '5q;d' $ticket | cut -c8-)
+        label=$(sed '4q;d' $ticket | cut -c8-)
+        wraplabel=$label
+        if [ ${#label} -gt 8 ]
+        then
+            wraplabel="$(echo $label | cut -c1-5)..."
+        fi
+        #author=$(sed '2q;d' $ticket | cut -c9-)
+        printf $format $id $status "$wraplabel" "$title"
+        ((counter++))
+    done
+    
+    printf "%s\n" $separator
+    echo "Total: $counter tickets."
     exit 0
 }
 
@@ -210,7 +251,7 @@ case "$subcommand" in
         ;;
 
     list)
-        echo "List tickets"
+        list_tickets
         ;; 
 esac
 
