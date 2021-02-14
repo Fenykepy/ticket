@@ -10,6 +10,7 @@
 # in git repository top level
 DIRECTORY="tickets/"
 LABELS=("bug" "enhancement" "documentation")
+SETTINGS=".ticket.conf"
 
 
 function usage { 
@@ -69,13 +70,17 @@ function cd_to_repository_top_level {
 
     ## Create tickets directory if necessary
     mkdir -p $DIRECTORY
+
+    ## Load settings
+    if [ -e "$SETTINGS" ]
+    then
+        . $SETTINGS
+    fi
 }
 
 
 function add_ticket {
     cd_to_repository_top_level
-
-    # TODO search for conf file, and grab tickets location and labels from it, otherwise use <git_root>/tickets
 
     ## Set current git email as author
     author=$(git config user.email)
