@@ -14,15 +14,14 @@ LABELS=("bug" "enhancement" "documentation")
 
 function usage { 
     echo "Usage:"
-    echo "  ticket -h                   Display this help message."
-    echo "  ticket                      Add a new ticket."
-    echo "  ticket add                  Also add a new ticket."
-    echo "  ticket close <ticket_path>  Set <ticket_path> as closed."
-    echo "  ticket open <ticket_path>   Set <ticket_path> as open."
-    echo "  ticket edit <ticket_path>   Open <ticket_path> in text editor."
-    echo "  ticket list                 List all tickets."
-    #echo "  ticket list -o              List all open tickets."
-    #echo "  ticket list -c              List all closed tickets."
+    echo "  ticket -h                       Display this help message."
+    echo "  ticket                          Add a new ticket."
+    echo "  ticket add                      Also add a new ticket."
+    echo "  ticket close <ticket_path>      Set <ticket_path> as closed."
+    echo "  ticket open <ticket_path>       Set <ticket_path> as open."
+    echo "  ticket edit <ticket_path>       Open <ticket_path> in text editor."
+    echo "  ticket list                     Print list of all tickets."
+    echo "  ticket list -s [open | closed]  Print list of open or closed tickets."
     #echo "  ticket list -l <label>      List all tickets with label <label>."
     #echo "  ticket list -a <author>     List all tickets with author <author>."
     exit 0
@@ -176,6 +175,22 @@ function list_tickets {
     cd_to_repository_top_level
     cd $DIRECTORY
 
+    echo "Status filter: $STATUS_FILTER"
+    if [ ! -z $STATUS_FILTER ]
+    then
+        if [ "$STATUS_FILTER" == "closed" ]
+        then
+            echo "List closed tickets"
+        elif [ "$STATUS_FILTER" == "open" ]
+        then
+            echo "List open tickets"
+        else
+            echo "Error: '$STATUS_FILTER' is not a valid argument for '-s' option."
+            echo "Valid arguments are 'open' or 'closed'."
+            exit 1
+        fi
+    fi
+
     format="%-10s%-8s%-10s%s\n"
     separator="----------------------------------------"
     printf $format "Id" "Status" "Label" "Title"
@@ -188,18 +203,33 @@ function list_tickets {
         status=$(sed '3q;d' $ticket | cut -c9-)
         title=$(sed '5q;d' $ticket | cut -c8-)
         label=$(sed '4q;d' $ticket | cut -c8-)
+        author=$(sed '2q;d' $ticket | cut -c9-)
+        
         wraplabel=$label
         if [ ${#label} -gt 8 ]
         then
             wraplabel="$(echo $label | cut -c1-5)..."
         fi
-        #author=$(sed '2q;d' $ticket | cut -c9-)
+       
+        ## Apply status filter
+        if [ ! -z $STATUS_FILTER ] && [ $STATUS_FILTER != "$status" ]
+        then
+            continue
+        fi
+
+
         printf $format $id $status "$wraplabel" "$title"
         ((counter++))
     done
     
     printf "%s\n" $separator
-    echo "Total: $counter tickets."
+    if [ $counter -gt 1 ]
+    then
+        echo "Total: $counter tickets."
+    else
+        echo "Total: $counter ticket."
+    fi
+
     exit 0
 }
 
@@ -222,7 +252,7 @@ shift $((OPTIND -1))
 
 
 subcommand=$1
-shift # remove `ticket` from list
+shift # remove `ticket` from arguments list
 
 
 ## if we have no subcommand
@@ -251,7 +281,26 @@ case "$subcommand" in
         ;;
 
     list)
+        ## Process list options
+        while getopts ":s:" opt
+        do
+            case ${opt} in
+                s)
+                    STATUS_FILTER=$OPTARG
+                    echo "Print $OPTARG tickets"
+                    ;;
+                \?)
+                    invalid_option $OPTARG
+                    ;;
+                :)
+                    echo "Invalid Option: -$OPTARG requires an argument" 1>&2
+                    exit 1
+                    ;;
+            esac
+        done
+        shift $((OPTIND -1))
         list_tickets
+
         ;; 
 esac
 
