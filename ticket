@@ -22,8 +22,8 @@ function usage {
     echo "  ticket edit <ticket_path>       Open <ticket_path> in text editor."
     echo "  ticket list                     Print list of all tickets."
     echo "  ticket list -s [open | closed]  Print list of open or closed tickets."
-    #echo "  ticket list -l <label>      List all tickets with label <label>."
-    #echo "  ticket list -a <author>     List all tickets with author <author>."
+    echo "  ticket list -l <label>          List all tickets with label <label>."
+    echo "  ticket list -a <author>         List all tickets with author <author>."
     exit 0
 }
 
@@ -217,6 +217,18 @@ function list_tickets {
             continue
         fi
 
+        ## Apply label filter
+        if [ ! -z $LABEL_FILTER ] && [ $LABEL_FILTER != "$label" ]
+        then
+            continue
+        fi
+
+        ## Apply author filter
+        if [ ! -z $AUTHOR_FILTER ] && [ $AUTHOR_FILTER != "$author" ]
+        then
+            continue
+        fi
+
 
         printf $format $id $status "$wraplabel" "$title"
         ((counter++))
@@ -282,12 +294,17 @@ case "$subcommand" in
 
     list)
         ## Process list options
-        while getopts ":s:" opt
+        while getopts ":s:l:a:" opt
         do
             case ${opt} in
                 s)
                     STATUS_FILTER=$OPTARG
-                    echo "Print $OPTARG tickets"
+                    ;;
+                l)
+                    LABEL_FILTER=$OPTARG
+                    ;;
+                a)
+                    AUTHOR_FILTER=$OPTARG
                     ;;
                 \?)
                     invalid_option $OPTARG
