@@ -24,7 +24,6 @@ function usage {
     #echo "  ticket list -c              List all closed tickets."
     #echo "  ticket list -l <label>      List all tickets with label <label>."
     #echo "  ticket list -a <author>     List all tickets with author <author>."
-    echo "  All commands must be called in a git repository."
     exit 0
 }
 
@@ -34,8 +33,103 @@ function invalid_option { # $1 is $OPTARG
     exit 1
 }
 
+function check_ticket_path { #$1 is ticket path, required
+    if [ -z "$1" ]
+    then
+        echo "You must specified a ticket path."
+        exit 1
+    elif [ ! -e "$1" ]
+    then
+        echo "No such ticket file '$1'."
+        exit 1
+    fi
+}
 
-## We allow to show help from anywhere
+function add_ticket {
+    ## Exit if we are not in git repository
+    repository=$(git rev-parse --is-inside-work-tree 2> /dev/null)
+    if [ "$repository" != "true" ]
+    then
+        echo "You must be inside a git repository to add new ticket."
+        echo "Exit"
+        exit 1
+    fi
+    ## Search git top level directory, cd to it.
+    cd "$(git rev-parse --show-toplevel)"
+
+    # TODO search for conf file, and grab tickets location and labels from it, otherwise use <git_root>/tickets
+
+    ## Set current git email as author
+    author=$(git config user.email)
+
+    ## Prompt user for ticket title
+    read -p 'Title: ' title
+
+    ## Promt user for ticket description
+    read -p 'Description: ' description
+
+    ## Prompt user for ticket label
+    PS3="Select ticket label: "
+    select label in "${LABELS[@]}"
+    do
+        if [ 1 -le "$REPLY" ] && [ "$REPLY" -le "${#LABELS[@]}" ]
+        then
+            echo "Label $label selected."
+            break
+        fi
+        echo "Wrong selection, try again"
+    done
+
+    ## Create tickets directory if necessary
+    mkdir -p $DIRECTORY
+
+    ## Set ticket ID as UUID first 8 chars (for readability)
+    ## Check if file exists, if so try another uuid. 
+    free=false
+    until [ $free == true ]
+    do
+        id=$(uuidgen | cut -c1-8 | awk '{ print tolower($0) }')
+        ticketpath=$DIRECTORY$id
+        if [ ! -e $ticketpath ]; then
+            free=true
+        fi
+
+    done
+
+    ## Save ticket
+    echo "ticket: $id" > $ticketpath
+    echo "author: $author" >> $ticketpath
+    echo "status: open" >> $ticketpath
+    echo "label: $label" >> $ticketpath
+    echo "title: $title" >> $ticketpath
+    echo "-----------" >> $ticketpath
+    echo "" >> $ticketpath
+    echo "$description" >> $ticketpath
+
+    ## Show result
+    echo ""
+    echo ""
+    echo "Ticket saved as $id"
+    echo ""
+    cat $ticketpath
+    echo ""
+    exit 0
+}
+
+function close_ticket { #$1 is ticket path, required
+    check_ticket_path $1
+    echo "Close ticket"
+    exit 0
+}
+
+function edit_ticket { #$1 is ticket path, required
+    check_ticket_path $1
+    echo "Edit ticket"
+    exit 0
+}
+
+
+
 
 ## Parse options of `ticket` command
 while getopts ":h" opt
@@ -52,75 +146,35 @@ done
 shift $((OPTIND -1))
 
 
+subcommand=$1
+shift # remove `ticket` from list
 
 
-## For rest of script, exit if we are not in git repository
-repository=$(git rev-parse --is-inside-work-tree 2> /dev/null)
-if [ "$repository" != "true" ]
+## if we have no subcommand
+if [ -z "$subcommand" ]
 then
-	echo "Not in a git repository."
-	echo "Exit"
-	exit 1
+    add_ticket
 fi
-## Search git top level directory, cd to it.
-cd "$(git rev-parse --show-toplevel)"
-
-# TODO search for conf file, and grab tickets location and labels from it, otherwise use <git_root>/tickets
 
 
-## Set current git email as author
-author=$(git config user.email)
+## Parse subcommand
+case "$subcommand" in
+    add)
+        add_ticket
+        ;;
 
-## Prompt user for ticket title
-read -p 'Title: ' title
+    close)
+        close_ticket $1
+        ;;
 
-## Promt user for ticket description
-read -p 'Description: ' description
+    edit)
+        edit_ticket $1
+        ;;
+
+    list)
+        echo "List tickets"
+        ;; 
+esac
 
 
-## Prompt user for ticket label
-PS3="Select ticket label: "
-select label in "${LABELS[@]}"
-do
-    if [ 1 -le "$REPLY" ] && [ "$REPLY" -le "${#LABELS[@]}" ]
-    then
-        echo "Label $label selected."
-        break
-    fi
-    echo "Wrong selection, try again"
-done
-
-## Create tickets directory if necessary
-mkdir -p $DIRECTORY
-
-## Set ticket ID as UUID first 8 chars (for readability)
-## Check if file exists, if so try another uuid. 
-free=false
-until [ $free == true ]
-do
-    id=$(uuidgen | cut -c1-8 | awk '{ print tolower($0) }')
-    ticketpath=$DIRECTORY$id
-    if [ ! -e $ticketpath ]; then
-        free=true
-    fi
-
-done
-
-## Save ticket
-echo "ticket: $id" > $ticketpath
-echo "author: $author" >> $ticketpath
-echo "status: open" >> $ticketpath
-echo "label: $label" >> $ticketpath
-echo "title: $title" >> $ticketpath
-echo "-----------" >> $ticketpath
-echo "" >> $ticketpath
-echo "$description" >> $ticketpath
-
-## Show result
-echo ""
-echo ""
-echo "Ticket saved as $id"
-echo ""
-cat $ticketpath
-echo ""
 

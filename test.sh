@@ -1,16 +1,27 @@
 #!/bin/bash
 
-function close_ticket { #$1 is ticket path
+function check_ticket_path { #$1 is ticket path, required
     if [ -z "$1" ]
     then
         echo "You must specified a ticket path."
         exit 1
     elif [ ! -e "$1" ]
     then
-        echo "No such ticket file $1."
-        exit 0
+        echo "No such ticket file '$1'."
+        exit 1
     fi
+}
+
+function close_ticket { #$1 is ticket path, required
+    check_ticket_path $1
     echo "Close ticket"
+    exit 0
+}
+
+function edit_ticket { #$1 is ticket path, required
+    check_ticket_path $1
+    echo "Edit ticket"
+    exit 0
 }
 
 
@@ -42,8 +53,6 @@ done
 shift $((OPTIND -1))
 
 
-
-
 subcommand=$1
 shift # remove `ticket` from list
 
@@ -64,11 +73,10 @@ case "$subcommand" in
 
     close)
         close_ticket $1
-        shift # remove `close` from list
         ;;
 
     edit)
-        echo "Edit ticket"
+        edit_ticket $1
         ;;
 
     list)
