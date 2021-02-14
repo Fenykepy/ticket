@@ -9,7 +9,7 @@
 # TODO export it to a separate ticket_setting.conf file
 # in git repository top level
 DIRECTORY="tickets/"
-LABELS=("bug" "enhancement" "documentation")
+LABELS=("bug" "enhancement" "documentation" "duplicate")
 SETTINGS=".ticket.conf"
 
 
