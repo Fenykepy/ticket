@@ -41,7 +41,7 @@ $ ticket open <path_to_ticket_file>
 ```
 $ ticket edit <path_to_ticket_file>
 ```
-### List all tickets
+#### List all tickets
 ```
 $ ticket list
 ```
