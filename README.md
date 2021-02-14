@@ -41,9 +41,35 @@ $ ticket open <path_to_ticket_file>
 ```
 $ ticket edit <path_to_ticket_file>
 ```
-#### List all tickets
+#### List tickets
+All:
 ```
 $ ticket list
+```
+
+Status open:
+```
+$ ticket list -s open
+```
+
+Status closed:
+```
+$ ticket list -s closed
+```
+
+Label `bug`:
+```
+$ ticket list -l bug
+```
+
+Filter by author:
+```
+$ ticket list -a author@domain.com
+```
+
+Mix options together:
+```
+$ ticket list -s open -l documentation -a author@domain.com
 ```
 
 #### Get some help
