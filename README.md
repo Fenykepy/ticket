@@ -76,3 +76,28 @@ Mix options together:
 ```
 $ ticket list -s open -l documentation -a author@domain.com
 ```
+
+## Configuration
+
+Ticket will search for a configuration file `.ticket.conf` on git repository’s top level.
+
+ `.ticket.conf` example:
+
+```bash
+#/bin/bash
+
+
+#####################################
+###   ticket configuration file   ###
+#####################################
+
+## Directory where tickets will be stored
+## Trailing slash "/" is required
+## relative to git top level directory
+## default to "tickets/"
+DIRECTORY="tickets/"
+
+## Array of strings to be used as labels
+## default to ("bug" "enhancement" "documentation" "duplicate")
+LABELS=("bug" "enhancement" "documentation" "duplicate")
+```
