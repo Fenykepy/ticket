@@ -11,6 +11,11 @@ Copy `ticket` file somewhere in your `$path`.
 
 ## Usage
 
+#### Get some help
+```
+$ ticket -h
+```
+
 #### Add a new ticket
 ```
 $ ticket
@@ -70,9 +75,4 @@ $ ticket list -a author@domain.com
 Mix options together:
 ```
 $ ticket list -s open -l documentation -a author@domain.com
-```
-
-#### Get some help
-```
-$ ticket -h
 ```
