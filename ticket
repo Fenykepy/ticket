@@ -17,8 +17,9 @@ function usage {
     echo "  ticket -h                   Display this help message."
     echo "  ticket                      Add a new ticket."
     echo "  ticket add                  Also add a new ticket."
-    #echo "  ticket close <ticket_id>    Set <ticket_id> as closed."
-    #echo "  ticket edit <ticket_id>     Open <ticket_id> in text editor."
+    echo "  ticket close <ticket_path>    Set <ticket_path> as closed."
+    echo "  ticket open <ticket_path>    Set <ticket_path> as open."
+    echo "  ticket edit <ticket_path>     Open <ticket_path> in text editor."
     #echo "  ticket list                 List all tickets."
     #echo "  ticket list -o              List all open tickets."
     #echo "  ticket list -c              List all closed tickets."
@@ -127,7 +128,31 @@ function add_ticket {
 
 function close_ticket { #$1 is ticket path, required
     check_ticket_path $1
-    echo "Close ticket"
+    status=$(sed '3q;d' $1 | cut -c9-)
+    id=$(sed '1q;d' $1 | cut -c9-) 
+    
+    if [ "$status" == "closed" ]
+    then
+        echo "Ticket '$id' is already closed."
+        exit 0
+    fi
+    sed -i '.back' '3s/.*/status: closed/' $1
+    echo "Closed ticket '$id'"
+    exit 0
+}
+
+function open_ticket { #$1 is ticket path, required
+    check_ticket_path $1
+    status=$(sed '3q;d' $1 | cut -c9-)
+    id=$(sed '1q;d' $1 | cut -c9-) 
+    
+    if [ "$status" == "open" ]
+    then
+        echo "Ticket '$id' is already open."
+        exit 0
+    fi
+    sed -i '.back' '3s/.*/status: open/' $1
+    echo "Opened ticket '$id'"
     exit 0
 }
 
@@ -174,6 +199,10 @@ case "$subcommand" in
 
     close)
         close_ticket $1
+        ;;
+
+    open)
+        open_ticket $1
         ;;
 
     edit)
