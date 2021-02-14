@@ -8,46 +8,51 @@
 ## Configuration
 # TODO export it to a separate ticket_setting.conf file
 # in git repository top level
-directory="tickets/"
-labels=("bug" "enhancement" "documentation")
+DIRECTORY="tickets/"
+LABELS=("bug" "enhancement" "documentation")
 
 
-function print_help { 
+function usage { 
     echo "Usage:"
     echo "  ticket -h                   Display this help message."
     echo "  ticket                      Add a new ticket."
-    echo "  ticket add                  Also add a new ticket."
-    echo "  ticket close <ticket_id>    Set <ticket_id> as closed."
-    echo "  ticket edit <ticket_id>     Open <ticket_id> in text editor."
-    echo "  ticket list                 List all tickets."
-    echo "  ticket list -o              List all open tickets."
-    echo "  ticket list -c              List all closed tickets."
-    echo "  ticket list -l <label>      List all tickets with label <label>."
-    echo "  ticket list -a <author>     List all tickets with author <author>."
+    #echo "  ticket add                  Also add a new ticket."
+    #echo "  ticket close <ticket_id>    Set <ticket_id> as closed."
+    #echo "  ticket edit <ticket_id>     Open <ticket_id> in text editor."
+    #echo "  ticket list                 List all tickets."
+    #echo "  ticket list -o              List all open tickets."
+    #echo "  ticket list -c              List all closed tickets."
+    #echo "  ticket list -l <label>      List all tickets with label <label>."
+    #echo "  ticket list -a <author>     List all tickets with author <author>."
     echo "  All commands must be called in a git repository."
     exit 0
 }
 
 
-function print_invalid_option {
+function invalid_option { # $1 is $OPTARG
     echo "Invalid option: -$1" 1>&2
     exit 1
 }
 
 
 ## We allow to show help from anywhere
+
+## Parse options of `ticket` command
 while getopts ":h" opt
 do
     case ${opt} in
         h)
-            print_help
+            usage
             ;;
         \?)
-            print_invalid_option $OPTARG
+            invalid_option $OPTARG
             ;;
     esac
 done
 shift $((OPTIND -1))
+
+
+
 
 ## For rest of script, exit if we are not in git repository
 repository=$(git rev-parse --is-inside-work-tree 2> /dev/null)
@@ -75,9 +80,9 @@ read -p 'Description: ' description
 
 ## Prompt user for ticket label
 PS3="Select ticket label: "
-select label in "${labels[@]}"
+select label in "${LABELS[@]}"
 do
-    if [ 1 -le "$REPLY" ] && [ "$REPLY" -le "${#labels[@]}" ]
+    if [ 1 -le "$REPLY" ] && [ "$REPLY" -le "${#LABELS[@]}" ]
     then
         echo "Label $label selected."
         break
@@ -86,7 +91,7 @@ do
 done
 
 ## Create tickets directory if necessary
-mkdir -p $directory
+mkdir -p $DIRECTORY
 
 ## Set ticket ID as UUID first 8 chars (for readability)
 ## Check if file exists, if so try another uuid. 
@@ -94,7 +99,7 @@ free=false
 until [ $free == true ]
 do
     id=$(uuidgen | cut -c1-8 | awk '{ print tolower($0) }')
-    ticketpath=$directory$id
+    ticketpath=$DIRECTORY$id
     if [ ! -e $ticketpath ]; then
         free=true
     fi

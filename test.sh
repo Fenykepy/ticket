@@ -1,14 +1,20 @@
 #!/bin/bash
 
-# -h -> display help message
-# add or no argument -> add a new ticket
-# close <filename> -> close a ticket
-# edit <filename> -> edit a ticket
-# list -c --closed -> list closed tickets
-# list -o --open -> list open tickets
-# list -l --label <label> -> list tickets with given label
-# list -a --author <author> -> list tickets with given author
+function close_ticket { #$1 is ticket path
+    if [ -z "$1" ]
+    then
+        echo "You must specified a ticket path."
+        exit 1
+    elif [ ! -e "$1" ]
+    then
+        echo "No such ticket file $1."
+        exit 0
+    fi
+    echo "Close ticket"
+}
 
+
+## Parse options of `ticket` command
 while getopts ":h" opt
 do
     case ${opt} in
@@ -34,4 +40,39 @@ do
     esac
 done
 shift $((OPTIND -1))
+
+
+
+
+subcommand=$1
+shift # remove `ticket` from list
+
+
+## if we have no subcommand
+if [ -z "$subcommand" ]
+then
+    echo "Add a new ticket"
+    exit 0
+fi
+
+
+## Parse subcommand
+case "$subcommand" in
+    add)
+        echo "Add a new ticket"
+        ;;
+
+    close)
+        close_ticket $1
+        shift # remove `close` from list
+        ;;
+
+    edit)
+        echo "Edit ticket"
+        ;;
+
+    list)
+        echo "List tickets"
+        ;; 
+esac
 
