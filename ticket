@@ -5,6 +5,9 @@
 ## in a plain text file in git root directery       ##
 ######################################################
 
+## Version
+VERSION=0.0.1
+
 ## Configuration
 # TODO export it to a separate ticket_setting.conf file
 # in git repository top level
@@ -25,6 +28,12 @@ function usage {
     echo "  ticket list -s [open | closed]  Print list of open or closed tickets."
     echo "  ticket list -l <label>          List all tickets with label <label>."
     echo "  ticket list -a <author>         List all tickets with author <author>."
+    echo "  ticket -v                       Print version."
+    exit 0
+}
+
+function version {
+    echo "v$VERSION"
     exit 0
 }
 
@@ -254,11 +263,14 @@ function list_tickets {
 
 
 ## Parse options of `ticket` command
-while getopts ":h" opt
+while getopts ":hv" opt
 do
     case ${opt} in
         h)
             usage
+            ;;
+        v)
+            version
             ;;
         \?)
             invalid_option $OPTARG

@@ -6,7 +6,7 @@ All tickets are stored in a `tickets` directory at repository’s top level.
 You can commit your tickets as any other file.
 
 ## Installation
-Copy `ticket` file somewhere in your `$path`.
+Copy `ticket` file somewhere in your `$PATH`.
 
 
 ## Usage
@@ -14,6 +14,11 @@ Copy `ticket` file somewhere in your `$path`.
 #### Get some help
 ```
 $ ticket -h
+```
+
+#### Show programm version
+```
+$ ticket -v
 ```
 
 #### Add a new ticket
