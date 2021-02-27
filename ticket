@@ -6,7 +6,7 @@
 ######################################################
 
 ## Version
-VERSION=0.0.1
+VERSION=0.0.2
 
 ## Configuration
 # TODO export it to a separate ticket_setting.conf file
@@ -25,7 +25,8 @@ function usage {
     echo "  ticket open <ticket_path>       Set <ticket_path> as open."
     echo "  ticket edit <ticket_path>       Open <ticket_path> in text editor."
     echo "  ticket list                     Print list of all tickets."
-    echo "  ticket list -s [open | closed]  Print list of open or closed tickets."
+    echo "  ticket list -o                  Print list of open tickets."
+    echo "  ticket list -c                  Print list of closed tickets."
     echo "  ticket list -l <label>          List all tickets with label <label>."
     echo "  ticket list -a <author>         List all tickets with author <author>."
     echo "  ticket -v                       Print version."
@@ -311,11 +312,14 @@ case "$subcommand" in
 
     list)
         ## Process list options
-        while getopts ":s:l:a:" opt
+        while getopts ":ocl:a:" opt
         do
             case ${opt} in
-                s)
-                    STATUS_FILTER=$OPTARG
+                o)
+                    STATUS_FILTER=open
+                    ;;
+                c)
+                    STATUS_FILTER=closed
                     ;;
                 l)
                     LABEL_FILTER=$OPTARG

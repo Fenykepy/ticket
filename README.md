@@ -59,12 +59,12 @@ $ ticket list
 
 Status open:
 ```
-$ ticket list -s open
+$ ticket list -o
 ```
 
 Status closed:
 ```
-$ ticket list -s closed
+$ ticket list -c
 ```
 
 Label `bug`:
