@@ -17,7 +17,7 @@ cd ticket
 
 For mac os:
 ```
-git checkout master_macos
+git checkout master_macOS
 ```
 
 For linux:
