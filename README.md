@@ -6,6 +6,25 @@ All tickets are stored in a `tickets` directory at repository’s top level.
 You can commit your tickets as any other file.
 
 ## Installation
+
+####Clone repository
+```
+git clone https://github.com/Fenykepy/ticket.git
+cd ticket
+```
+
+#### Choose your system
+
+For mac os:
+```
+git checkout master_macos
+```
+
+For linux:
+```
+git checkout master
+```
+
 Copy `ticket` file somewhere in your `$PATH`.
 
 
