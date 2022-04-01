@@ -157,7 +157,12 @@ function close_ticket { #$1 is ticket path, required
         echo "Ticket '$id' is already closed."
         exit 0
     fi
-    sed -i '' '3s/.*/status: closed/' $1
+    # For Mac OS
+    #sed -i '' '3s/.*/status: closed/' $1
+
+    # For Linux
+    sed -i '3s/.*/status: closed/' $1
+
     echo "Closed ticket '$id'"
     exit 0
 }
@@ -173,7 +178,11 @@ function open_ticket { #$1 is ticket path, required
         echo "Ticket '$id' is already open."
         exit 0
     fi
-    sed -i '' '3s/.*/status: open/' $1
+    # For Mac OS
+    #sed -i '' '3s/.*/status: open/' $1
+    
+    # For Linux
+    sed -i '3s/.*/status: open/' $1
     echo "Opened ticket '$id'"
     exit 0
 }
